@@ -93,7 +93,8 @@ namespace HttpProxy.Middleware
 
             foreach (var header in context.Request.Headers)
             {
-                requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                //requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString());
             }
         }
 
@@ -108,6 +109,10 @@ namespace HttpProxy.Middleware
             {
                 context.Response.Headers[header.Key] = header.Value.ToArray();
             }
+
+            //context.Response.Headers["Connection"] = new string[] { "close" };
+            //context.Response.Headers["Cache-Control"] = new string[] { "no-cache", "no-store", "no-transform" };
+
             context.Response.Headers.Remove("transfer-encoding");
         }
         private static HttpMethod GetMethod(string method)
@@ -190,8 +195,8 @@ namespace HttpProxy.Middleware
                 //{
                 //    replacePathSegmentWith = RemoveTralingSlash(replacePathSegmentWith);
                 //}
-
-                targetUri = new Uri(replacePathSegmentWith + remainingPath);
+                var queryString = request.QueryString.Value;
+                targetUri = new Uri(replacePathSegmentWith + remainingPath + queryString);
             }
 
             return targetUri;
