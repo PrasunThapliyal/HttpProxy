@@ -1,12 +1,16 @@
 ﻿
 namespace HttpProxy.Middleware
 {
+    using HttpProxy.Middleware.POCO;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
 
     public class ReverseProxyMiddleware
@@ -15,12 +19,17 @@ namespace HttpProxy.Middleware
         private readonly RequestDelegate _nextMiddleware;
         private readonly ILogger<ReverseProxyMiddleware> _logger;
         private static long _counter = 0;
+        private static ProxyRules _proxyRules;
 
 
         public ReverseProxyMiddleware(RequestDelegate nextMiddleware, ILogger<ReverseProxyMiddleware> logger)
         {
             _nextMiddleware = nextMiddleware;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            
+            if (_proxyRules == null) {
+                _proxyRules = ReadJsonDataFile<ProxyRules>("Middleware//ProxyRules.json");
+            }
         }
 
         public async Task Invoke(HttpContext context)
@@ -135,40 +144,39 @@ namespace HttpProxy.Middleware
             //    pathStartsWith: "/googleforms", 
             //    replacePathSegmentWith: "http://localhost:5006/scenariobuilder/api/v1/networkdesigns/4c01857f-e044-4854-aae1-851ad3c252d1?include=sites,fibers");
 
-            List<(string pathStartsWith, string replacePathSegmentWith)> proxyPassRules = new List<(string pathStartsWith, string replacePathSegmentWith)>()
-            {
-                ("/planner-plus-ui/designs/", "http://127.0.0.1:8081/"),
-                ("/planner-plus-ui/design-wizard/", "http://127.0.0.1:8080/"),
-                ("/planner-plus-ui/design-settings/", "http://127.0.0.1:8082/"),
-                ("/login/", "https://dev.apps.ciena.com/login/"),
-                ("/sso/api/v1/identity-providers/", "https://dev.apps.ciena.com/sso/api/v1/identity-providers/"),
-                ("/sso/api/v1/identity-providers?next=%2F", "https://dev.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"),
-                ("/tron/", "https://dev.apps.ciena.com/tron/"),
-                ("/equipmenttopologyplanning", "http://localhost:5001/equipmenttopologyplanning"), // TODO : Need to add Header
-                ("/scenariobuilder", "http://localhost:5006/scenariobuilder"),
-                ("/sfdataprovider", "https://dev.apps.ciena.com/sfdataprovider"),
-                ("/solutionmanager", "https://dev.apps.ciena.com/solutionmanager"),
-                ("/nbis", "https://dev.apps.ciena.com/nbis"),
-                //("", ""),
-                //("", ""),
-                //("", ""),
-                //("", ""),
-                //("", ""),
-                //("", ""),
-                //("", ""),
-                //("", ""),
-                ("/", "https://dev.apps.ciena.com/"),
-                //("/", "http://127.0.0.1:8081/"),
-            };
+            //List<(string pathStartsWith, string replacePathSegmentWith)> proxyPassRules = new List<(string pathStartsWith, string replacePathSegmentWith)>()
+            //{
+            //    ("/planner-plus-ui/designs/", "http://127.0.0.1:8081/"),
+            //    ("/planner-plus-ui/design-wizard/", "http://127.0.0.1:8080/"),
+            //    ("/planner-plus-ui/design-settings/", "http://127.0.0.1:8082/"),
+            //    ("/login/", "https://dev.apps.ciena.com/login/"),
+            //    ("/sso/api/v1/identity-providers/", "https://dev.apps.ciena.com/sso/api/v1/identity-providers/"),
+            //    ("/sso/api/v1/identity-providers?next=%2F", "https://dev.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"),
+            //    ("/tron/", "https://dev.apps.ciena.com/tron/"),
+            //    ("/equipmenttopologyplanning", "http://localhost:5001/equipmenttopologyplanning"), // TODO : Need to add Header
+            //    ("/scenariobuilder", "http://localhost:5006/scenariobuilder"),
+            //    ("/sfdataprovider", "https://dev.apps.ciena.com/sfdataprovider"),
+            //    ("/solutionmanager", "https://dev.apps.ciena.com/solutionmanager"),
+            //    ("/nbis", "https://dev.apps.ciena.com/nbis"),
+            //    //("", ""),
+            //    //("", ""),
+            //    //("", ""),
+            //    //("", ""),
+            //    //("", ""),
+            //    //("", ""),
+            //    //("", ""),
+            //    //("", ""),
+            //    ("/", "https://dev.apps.ciena.com/"),
+            //    //("/", "http://127.0.0.1:8081/"),
+            //};
 
-
-            foreach (var proxyRule in proxyPassRules)
+            foreach (var proxyRule in _proxyRules.ProxyPass)
             {
                 if (targetUri == null)
                 {
                     targetUri = ProxyPass(request,
-                        pathStartsWith: proxyRule.pathStartsWith,
-                        replacePathSegmentWith: proxyRule.replacePathSegmentWith);
+                        pathStartsWith: proxyRule.PathStartsWith,
+                        replacePathSegmentWith: proxyRule.ReplacePathSegmentWith);
                 }
 
                 if (targetUri != null)
@@ -180,6 +188,19 @@ namespace HttpProxy.Middleware
             }
             
             return targetUri;
+        }
+
+
+        private T ReadJsonDataFile<T>(string path)
+        {
+            string content = string.Empty;
+
+            using (var reader = new StreamReader(path, Encoding.UTF8))
+            {
+                content = reader.ReadToEnd();
+            }
+
+            return JsonConvert.DeserializeObject<T>(content);
         }
 
         private static Uri ProxyPass(HttpRequest request, string pathStartsWith, string replacePathSegmentWith)

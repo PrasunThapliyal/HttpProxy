@@ -1,0 +1,53 @@
+{
+  "proxy_pass": [
+    {
+      "pathStartsWith": "/planner-plus-ui/designs/",
+      "replacePathSegmentWith": "http://127.0.0.1:8081/"
+    },
+    {
+      "pathStartsWith": "/planner-plus-ui/design-wizard/",
+      "replacePathSegmentWith": "http://127.0.0.1:8080/"
+    },
+    {
+      "pathStartsWith": "/login/",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/login/"
+    },
+    {
+      "pathStartsWith": "/sso/api/v1/identity-providers/",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/sso/api/v1/identity-providers/"
+    },
+    {
+      "pathStartsWith": "/sso/api/v1/identity-providers?next=%2F",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"
+    },
+    {
+      "pathStartsWith": "/tron/",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/tron/"
+    },
+    {
+      "pathStartsWith": "/equipmenttopologyplanning",
+      "replacePathSegmentWith": "http://localhost:5001/equipmenttopologyplanning"
+    },
+    {
+      "pathStartsWith": "/scenariobuilder",
+      "replacePathSegmentWith": "http://localhost:5006/scenariobuilder"
+    },
+    {
+      "pathStartsWith": "/sfdataprovider",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/sfdataprovider"
+    },
+    {
+      "pathStartsWith": "/solutionmanager",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/solutionmanager"
+    },
+    {
+      "pathStartsWith": "/nbis",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/nbis"
+    },
+    {
+      "pathStartsWith": "/",
+      "replacePathSegmentWith": "https://prasun.test.apps.ciena.com/"
+    }
+  ]
+
+}
