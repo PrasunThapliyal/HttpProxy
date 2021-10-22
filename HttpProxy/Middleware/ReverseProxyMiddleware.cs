@@ -3,6 +3,7 @@ namespace HttpProxy.Middleware
 {
     using HttpProxy.Middleware.POCO;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using System;
@@ -15,7 +16,7 @@ namespace HttpProxy.Middleware
 
     public class ReverseProxyMiddleware
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private readonly HttpClient _httpClient;
         private readonly RequestDelegate _nextMiddleware;
         private readonly ILogger<ReverseProxyMiddleware> _logger;
         private static long _counter = 0;
@@ -30,8 +31,19 @@ namespace HttpProxy.Middleware
             if (_proxyRules == null) {
                 _proxyRules = ReadJsonDataFile<ProxyRules>("Middleware//ProxyRules.json");
             }
+
+            // https://stackoverflow.com/questions/10642528/how-does-one-configure-httpclient-not-to-automatically-redirect-when-it-receives
+            var handler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = false
+            };
+
+            _httpClient = new HttpClient(handler);
+            _httpClient.Timeout = TimeSpan.FromMinutes(180);
         }
 
+
+        //[DisableRequestSizeLimit] // Does not work
         public async Task Invoke(HttpContext context)
         {
             var counter = _counter++;
@@ -93,7 +105,7 @@ namespace HttpProxy.Middleware
 
             if (!HttpMethods.IsGet(requestMethod) &&
               !HttpMethods.IsHead(requestMethod) &&
-              !HttpMethods.IsDelete(requestMethod) &&
+              //!HttpMethods.IsDelete(requestMethod) &&
               !HttpMethods.IsTrace(requestMethod))
             {
                 var streamContent = new StreamContent(context.Request.Body);
