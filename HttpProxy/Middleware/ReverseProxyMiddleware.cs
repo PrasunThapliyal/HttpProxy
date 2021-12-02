@@ -32,13 +32,24 @@ namespace HttpProxy.Middleware
                 _proxyRules = ReadJsonDataFile<ProxyRules>("Middleware//ProxyRules.json");
             }
 
-            // https://stackoverflow.com/questions/10642528/how-does-one-configure-httpclient-not-to-automatically-redirect-when-it-receives
-            var handler = new HttpClientHandler()
-            {
-                AllowAutoRedirect = false
-            };
+            //// https://stackoverflow.com/questions/10642528/how-does-one-configure-httpclient-not-to-automatically-redirect-when-it-receives
+            //var handler = new HttpClientHandler()
+            //{
+            //    AllowAutoRedirect = false
+            //};
 
-            _httpClient = new HttpClient(handler);
+            //_httpClient = new HttpClient(handler);
+
+            {
+                // For on-prem machines that do not have a valid SSL cert, such as 10.182.39.22
+                var handler = new HttpClientHandler()
+                {
+                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
+                };
+                _httpClient = new HttpClient(handler);
+            }
+
+            //_httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromMinutes(180);
         }
 
@@ -78,7 +89,7 @@ namespace HttpProxy.Middleware
             requestMessage.Method = GetMethod(context.Request.Method);
 
             var bearerToken = context.Request.Cookies["uac.authorization"];
-            if (! string.IsNullOrEmpty(bearerToken))
+            if (!string.IsNullOrEmpty(bearerToken))
             {
                 requestMessage.Headers.Add("Authorization", $"Bearer {bearerToken}");
             }
@@ -95,6 +106,11 @@ namespace HttpProxy.Middleware
                 requestMessage.Headers.Add("ciena-user-id", $"{cienaUserId}");
             }
 
+            // Copy Cookies: https://stackoverflow.com/questions/65228306/simple-way-to-transfer-cookies-from-current-httpcontext-into-new-created-httpcli
+            if (context.Request.Headers.TryGetValue("Cookie", out var cookies))
+            {
+                requestMessage.Headers.TryAddWithoutValidation("Cookie", cookies.ToArray());
+            }
 
             return requestMessage;
         }

@@ -45,6 +45,14 @@ namespace HttpProxy
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                    System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "StaticFiles")),
+                RequestPath = "/StaticFiles",
+                EnableDefaultFiles = true
+            });
+
             // See https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-5.0
             app.UseForwardedHeaders();
 
