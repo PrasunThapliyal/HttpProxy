@@ -3,57 +3,60 @@
     {
       "pathStartsWith": "/planner-plus-ui/designs/",
       "#replacePathSegmentWith": "http://127.0.0.1:8081/",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/planner-plus-ui/designs/"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/planner-plus-ui/designs/"
     },
     {
       "pathStartsWith": "/planner-plus-ui/design-wizard/",
       "#replacePathSegmentWith": "http://127.0.0.1:8080/",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/planner-plus-ui/design-wizard/"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/planner-plus-ui/design-wizard/",
+      "##replacePathSegmentWith": "https://localhost/StaticFiles/dist/"
     },
     {
       "pathStartsWith": "/nominatim/",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/nominatim/"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/nominatim/"
     },
     {
       "pathStartsWith": "/login/",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/login/"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/login/"
     },
     {
       "pathStartsWith": "/sso/api/v1/identity-providers/",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/sso/api/v1/identity-providers/"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/sso/api/v1/identity-providers/"
     },
     {
       "pathStartsWith": "/sso/api/v1/identity-providers?next=%2F",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"
     },
     {
       "pathStartsWith": "/tron/",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/tron/"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/tron/",
+      "#replacePathSegmentWith": "http://newdev.test.apps.ciena.com/tron/"
     },
     {
       "pathStartsWith": "/equipmenttopologyplanning",
       "#replacePathSegmentWith": "http://localhost:5001/equipmenttopologyplanning",
-      "replacePathSegmentWith": "http://grids3.test.apps.ciena.com/equipmenttopologyplanning"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/equipmenttopologyplanning"
     },
     {
       "pathStartsWith": "/scenariobuilder",
-      "replacePathSegmentWith": "http://localhost:5006/scenariobuilder"
+      "#replacePathSegmentWith": "http://localhost:5006/scenariobuilder",
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/scenariobuilder"
     },
     {
       "pathStartsWith": "/sfdataprovider",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/sfdataprovider"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/sfdataprovider"
     },
     {
       "pathStartsWith": "/solutionmanager",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/solutionmanager"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/solutionmanager"
     },
     {
       "pathStartsWith": "/nbis",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/nbis"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/nbis"
     },
     {
       "pathStartsWith": "/",
-      "replacePathSegmentWith": "https://grids3.test.apps.ciena.com/"
+      "replacePathSegmentWith": "https://newdev.test.apps.ciena.com/"
     }
   ]
 

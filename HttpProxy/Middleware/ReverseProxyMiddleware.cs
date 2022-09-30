@@ -11,6 +11,7 @@ namespace HttpProxy.Middleware
     using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -64,16 +65,122 @@ namespace HttpProxy.Middleware
 
             if (targetUri != null)
             {
-                var targetRequestMessage = CreateTargetMessage(context, targetUri);
-                _logger.LogInformation($"{counter}: {targetRequestMessage.Method}, {targetRequestMessage.RequestUri}");
-
-                using (var responseMessage = await _httpClient.SendAsync(targetRequestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted))
+                // Special Handling for Tron for Connected account VMs without SSL cert
+                // Eg: targetUri.OriginalString = http://sup3mig2.test.apps.ciena.com/tron/api/v1/tokens
+                if (targetUri.OriginalString.Contains("tron/api/v1/tokens-xxxx", StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogInformation($"{counter}: {responseMessage.StatusCode}, Time: {sw.ElapsedMilliseconds} ms");
-                    context.Response.StatusCode = (int)responseMessage.StatusCode;
-                    CopyFromTargetResponseHeaders(context, responseMessage);
-                    await responseMessage.Content.CopyToAsync(context.Response.Body);
+                    var baseAddress = targetUri.OriginalString.Replace("api/v1/tokens", "");
+                    HttpClientHandler clientHandler = new HttpClientHandler();
+                    clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                    using (var client = new HttpClient(clientHandler))
+                    {
+                        client.BaseAddress = new Uri(baseAddress);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        //var streamContent = new StreamContent(context.Request.Body);
+                        //requestMessage.Content = streamContent;
+
+                        var content = new StringContent("{ \"username\":\"admin\",\"password\":\"ftpUserpw\"}", Encoding.UTF8, "application/json");
+                        var requestUri = "api/v1/tokens";
+                        var responseMessage = await client.PostAsync(requestUri, content).ConfigureAwait(false);
+                        //var responseMessage = await client.PostAsync(requestUri, streamContent).ConfigureAwait(false);
+                        _logger.LogInformation($"{counter}: {responseMessage.StatusCode}, Time: {sw.ElapsedMilliseconds} ms");
+                        context.Response.StatusCode = (int)responseMessage.StatusCode;
+                        CopyFromTargetResponseHeaders(context, responseMessage);
+                        await responseMessage.Content.CopyToAsync(context.Response.Body);
+                    }
                 }
+                else if (targetUri.OriginalString.Contains("tron/api/v1/tokens-xxxx", StringComparison.OrdinalIgnoreCase))
+                {
+                    // onxv1339 has form data for this api
+
+                    HttpClientHandler clientHandler = new HttpClientHandler();
+                    clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+                    var client = new HttpClient(clientHandler);
+                    var baseUrl = "https://10.182.40.117/tron/api/v1/tokens/";
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "multipart/form-data");
+
+                    //var baseAddress = targetUri.OriginalString.Replace("api/v1/tokens", "");
+                    //var baseAddress = "https://10.182.40.117/tron/";
+                    //HttpClientHandler clientHandler = new HttpClientHandler();
+                    //clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+                    //var client = new HttpClient(clientHandler);
+                    //client.BaseAddress = new Uri(baseAddress);
+                    //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    //client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "multipart/form-data");
+                    var formContent = new MultipartFormDataContent
+                    {
+                        {new StringContent("authType"),"password"},
+                        {new StringContent("tenant"),"master" },
+                        {new StringContent("tenant_context"),"master" },
+                        {new StringContent("username"),"admin"},
+                        {new StringContent("password"),"adminpw"},
+                    };
+                    //var requestUri = "api/v1/tokens";
+                    //var response = client.PostAsync(requestUri, formContent).Result;
+
+                    var response = client.PostAsync(baseUrl, formContent).Result;
+                    context.Response.StatusCode = (int)response.StatusCode;
+                    CopyFromTargetResponseHeaders(context, response);
+                    await response.Content.CopyToAsync(context.Response.Body);
+                }
+                else if (targetUri.OriginalString.Contains("tron/api/v1/tokens-xxx", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 10.182.40.117 (On-Prem) has form data for this api - this works
+
+                    HttpClientHandler clientHandler = new HttpClientHandler();
+                    clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+                    var client = new HttpClient(clientHandler);
+                    var baseUrl = "https://10.182.40.117/tron/api/v1/tokens/";
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+                    client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/x-www-form-urlencoded");
+                    client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36");
+
+                    var formContent = new MultipartFormDataContent
+                    {
+                        //{new StringContent("authType"),"password"},
+                        //{new StringContent("tenant"),"master" },
+                        //{new StringContent("tenant_context"),"master" },
+                        //{new StringContent("username"),"admin"},
+                        //{new StringContent("password"),"adminpw"},
+
+                        {new StringContent("password"),"authType"},
+                        {new StringContent("master"),"tenant" },
+                        {new StringContent("master"),"tenant_context" },
+                        {new StringContent("admin"),"username"},
+                        {new StringContent("adminpw"),"password"},
+                    };
+
+                    var response = client.PostAsync(baseUrl, formContent).Result;
+                    context.Response.StatusCode = (int)response.StatusCode;
+                    CopyFromTargetResponseHeaders(context, response);
+                    await response.Content.CopyToAsync(context.Response.Body);
+                }
+                else
+                {
+                    var targetRequestMessage = CreateTargetMessage(context, targetUri);
+                    _logger.LogInformation($"{counter}: {targetRequestMessage.Method}, {targetRequestMessage.RequestUri}");
+
+                    try
+                    {
+                        using (var responseMessage = await _httpClient.SendAsync(targetRequestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted))
+                        {
+                            _logger.LogInformation($"{counter}: {responseMessage.StatusCode}, Time: {sw.ElapsedMilliseconds} ms");
+                            context.Response.StatusCode = (int)responseMessage.StatusCode;
+                            CopyFromTargetResponseHeaders(context, responseMessage);
+                            await responseMessage.Content.CopyToAsync(context.Response.Body);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"[{counter}]: Exception: {ex}");
+                        throw;
+                    }
+                }
+
                 return;
             }
             await _nextMiddleware(context);
@@ -91,6 +198,7 @@ namespace HttpProxy.Middleware
             var bearerToken = context.Request.Cookies["uac.authorization"];
             if (!string.IsNullOrEmpty(bearerToken))
             {
+                requestMessage.Headers.Remove("Authorization");
                 requestMessage.Headers.Add("Authorization", $"Bearer {bearerToken}");
             }
 
@@ -126,12 +234,49 @@ namespace HttpProxy.Middleware
             {
                 var streamContent = new StreamContent(context.Request.Body);
                 requestMessage.Content = streamContent;
+                //streamContent.ReadAsStreamAsync().GetAwaiter().GetResult();                
+                streamContent.ReadAsStringAsync().GetAwaiter().GetResult();
             }
+
+            //foreach (var header in context.Request.Headers)
+            //{
+            //    //requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+            //    requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString());
+            //}
+
+            // TODO : Check this for Form data: https://codingcanvas.com/different-ways-of-uploading-files-using-http-based-apis-part-1/
 
             foreach (var header in context.Request.Headers)
             {
-                //requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
-                requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString());
+                if (requestMessage.Content != null)
+                {
+                    if (header.Key.Equals("Content-Type", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        AddHeader(requestMessage.Content?.Headers, header.Key, header.Value.ToString());
+                    }
+                }
+
+                AddHeader(requestMessage.Headers, header.Key, header.Value.ToString());
+            }
+
+        }
+
+        private void AddHeader(HttpHeaders headers, string headerName, string headerValue)
+        {
+            if (headers == null)
+            {
+                _logger.LogWarning($"null headers. {headerName}, {headerValue}");
+                return;
+            }
+
+            headers.TryGetValues(headerName, out IEnumerable<string> values);
+            if (values?.Count() > 0)
+            {
+                _logger.LogWarning($"A {headers.GetType()} type header {headerName} with value {values} already exists");
+            }
+            else
+            {
+                headers.TryAddWithoutValidation(headerName, headerValue);
             }
         }
 

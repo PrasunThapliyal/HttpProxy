@@ -1,12 +1,51 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <meta charSet="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style media="only screen">
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        html {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0;
+            overflow: auto;
+        }
+
+        body {
+            padding: 1rem;
+            overflow: auto;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js">
+    </script>
 </head>
 <body>
     <h1>The onclick Event</h1>
     <button onclick="myFunction()">Click Me</button>
+    <button onclick="myFunction7()">Click Me 7</button>
+    <button onclick="myFunction6()">Click Me 6</button>
+    <button onclick="myFunction5()">Click Me 5</button>
+    <button onclick="myFunction4()">Click Me 4</button>
+    <button onclick="myFunction3()">Click Me 3</button>
+    <button onclick="myFunction2()">Click Me 2</button>
     <p></p>
     <div id="demo">Demo</div>
+    <div id="myGrid" style="height: 100%;" class="ag-theme-alpine-dark">
+    </div>
+    <script>var __basePath = './';</script>
+    <script src="https://unpkg.com/@ag-grid-enterprise/all-modules@26.2.0/dist/ag-grid-enterprise.min.js">
+    </script>
     <script type="text/javascript" src="index.js"></script>
 </body>
 </html>
