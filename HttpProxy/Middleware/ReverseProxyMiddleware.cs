@@ -12,6 +12,7 @@ namespace HttpProxy.Middleware
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Reflection.Metadata.Ecma335;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -65,122 +66,24 @@ namespace HttpProxy.Middleware
 
             if (targetUri != null)
             {
-                // Special Handling for Tron for Connected account VMs without SSL cert
-                // Eg: targetUri.OriginalString = http://sup3mig2.test.apps.ciena.com/tron/api/v1/tokens
-                if (targetUri.OriginalString.Contains("tron/api/v1/tokens-xxxx", StringComparison.OrdinalIgnoreCase))
+                var targetRequestMessage = CreateTargetMessage(context, targetUri);
+                _logger.LogInformation($"{counter}: {targetRequestMessage.Method}, {targetRequestMessage.RequestUri}");
+
+                try
                 {
-                    var baseAddress = targetUri.OriginalString.Replace("api/v1/tokens", "");
-                    HttpClientHandler clientHandler = new HttpClientHandler();
-                    clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
-
-                    using (var client = new HttpClient(clientHandler))
+                    using (var responseMessage = await _httpClient.SendAsync(targetRequestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted))
                     {
-                        client.BaseAddress = new Uri(baseAddress);
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                        //var streamContent = new StreamContent(context.Request.Body);
-                        //requestMessage.Content = streamContent;
-
-                        var content = new StringContent("{ \"username\":\"admin\",\"password\":\"ftpUserpw\"}", Encoding.UTF8, "application/json");
-                        var requestUri = "api/v1/tokens";
-                        var responseMessage = await client.PostAsync(requestUri, content).ConfigureAwait(false);
-                        //var responseMessage = await client.PostAsync(requestUri, streamContent).ConfigureAwait(false);
                         _logger.LogInformation($"{counter}: {responseMessage.StatusCode}, Time: {sw.ElapsedMilliseconds} ms");
                         context.Response.StatusCode = (int)responseMessage.StatusCode;
                         CopyFromTargetResponseHeaders(context, responseMessage);
                         await responseMessage.Content.CopyToAsync(context.Response.Body);
                     }
                 }
-                else if (targetUri.OriginalString.Contains("tron/api/v1/tokens-xxxx", StringComparison.OrdinalIgnoreCase))
+                catch (Exception ex)
                 {
-                    // onxv1339 has form data for this api
-
-                    HttpClientHandler clientHandler = new HttpClientHandler();
-                    clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
-                    var client = new HttpClient(clientHandler);
-                    var baseUrl = "https://10.182.40.117/tron/api/v1/tokens/";
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "multipart/form-data");
-
-                    //var baseAddress = targetUri.OriginalString.Replace("api/v1/tokens", "");
-                    //var baseAddress = "https://10.182.40.117/tron/";
-                    //HttpClientHandler clientHandler = new HttpClientHandler();
-                    //clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
-                    //var client = new HttpClient(clientHandler);
-                    //client.BaseAddress = new Uri(baseAddress);
-                    //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    //client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "multipart/form-data");
-                    var formContent = new MultipartFormDataContent
-                    {
-                        {new StringContent("authType"),"password"},
-                        {new StringContent("tenant"),"master" },
-                        {new StringContent("tenant_context"),"master" },
-                        {new StringContent("username"),"admin"},
-                        {new StringContent("password"),"adminpw"},
-                    };
-                    //var requestUri = "api/v1/tokens";
-                    //var response = client.PostAsync(requestUri, formContent).Result;
-
-                    var response = client.PostAsync(baseUrl, formContent).Result;
-                    context.Response.StatusCode = (int)response.StatusCode;
-                    CopyFromTargetResponseHeaders(context, response);
-                    await response.Content.CopyToAsync(context.Response.Body);
+                    _logger.LogError($"[{counter}]: Exception: {ex}");
+                    throw;
                 }
-                else if (targetUri.OriginalString.Contains("tron/api/v1/tokens-xxx", StringComparison.OrdinalIgnoreCase))
-                {
-                    // 10.182.40.117 (On-Prem) has form data for this api - this works
-
-                    HttpClientHandler clientHandler = new HttpClientHandler();
-                    clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
-                    var client = new HttpClient(clientHandler);
-                    var baseUrl = "https://10.182.40.117/tron/api/v1/tokens/";
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
-                    client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/x-www-form-urlencoded");
-                    client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36");
-
-                    var formContent = new MultipartFormDataContent
-                    {
-                        //{new StringContent("authType"),"password"},
-                        //{new StringContent("tenant"),"master" },
-                        //{new StringContent("tenant_context"),"master" },
-                        //{new StringContent("username"),"admin"},
-                        //{new StringContent("password"),"adminpw"},
-
-                        {new StringContent("password"),"authType"},
-                        {new StringContent("master"),"tenant" },
-                        {new StringContent("master"),"tenant_context" },
-                        {new StringContent("admin"),"username"},
-                        {new StringContent("adminpw"),"password"},
-                    };
-
-                    var response = client.PostAsync(baseUrl, formContent).Result;
-                    context.Response.StatusCode = (int)response.StatusCode;
-                    CopyFromTargetResponseHeaders(context, response);
-                    await response.Content.CopyToAsync(context.Response.Body);
-                }
-                else
-                {
-                    var targetRequestMessage = CreateTargetMessage(context, targetUri);
-                    _logger.LogInformation($"{counter}: {targetRequestMessage.Method}, {targetRequestMessage.RequestUri}");
-
-                    try
-                    {
-                        using (var responseMessage = await _httpClient.SendAsync(targetRequestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted))
-                        {
-                            _logger.LogInformation($"{counter}: {responseMessage.StatusCode}, Time: {sw.ElapsedMilliseconds} ms");
-                            context.Response.StatusCode = (int)responseMessage.StatusCode;
-                            CopyFromTargetResponseHeaders(context, responseMessage);
-                            await responseMessage.Content.CopyToAsync(context.Response.Body);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError($"[{counter}]: Exception: {ex}");
-                        throw;
-                    }
-                }
-
                 return;
             }
             await _nextMiddleware(context);
@@ -205,12 +108,14 @@ namespace HttpProxy.Middleware
             var cienaUserName = context.Request.Cookies["uac.username"];
             if (!string.IsNullOrEmpty(cienaUserName))
             {
+                requestMessage.Headers.Remove("ciena-user-name");
                 requestMessage.Headers.Add("ciena-user-name", $"{cienaUserName}");
             }
 
             var cienaUserId = context.Request.Cookies["uac.user_id"];
             if (!string.IsNullOrEmpty(cienaUserName))
             {
+                requestMessage.Headers.Remove("ciena-user-id");
                 requestMessage.Headers.Add("ciena-user-id", $"{cienaUserId}");
             }
 
@@ -223,7 +128,33 @@ namespace HttpProxy.Middleware
             return requestMessage;
         }
 
-        private void CopyFromOriginalRequestContentAndHeaders(HttpContext context, HttpRequestMessage requestMessage)
+        private async void CopyFromOriginalRequestContentAndHeaders(HttpContext context, HttpRequestMessage newRequestMessage)
+        {
+            // ref :https://stackoverflow.com/questions/25044166/how-to-clone-a-httprequestmessage-when-the-original-request-has-content
+
+            var requestMethod = context.Request.Method;
+
+            if (context.Request.ContentLength != 0)
+            {
+                var memStream = new MemoryStream();
+                await context.Request.Body.CopyToAsync(memStream);
+                memStream.Position = 0;
+                newRequestMessage.Content = new StreamContent(memStream);
+                context.Request.Headers?.ToList().ForEach(
+                    header =>
+                    {
+                        if (header.Key.Equals("Content-Type", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            newRequestMessage.Content.Headers.Add(header.Key, header.Value.ToArray());
+                        }
+                    });
+            }
+
+            context.Request.Headers.ToList().ForEach(
+                header => newRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray()));
+        }
+
+        private void CopyFromOriginalRequestContentAndHeaders_(HttpContext context, HttpRequestMessage requestMessage)
         {
             var requestMethod = context.Request.Method;
 
@@ -234,20 +165,27 @@ namespace HttpProxy.Middleware
             {
                 var streamContent = new StreamContent(context.Request.Body);
                 requestMessage.Content = streamContent;
-                //streamContent.ReadAsStreamAsync().GetAwaiter().GetResult();                
                 streamContent.ReadAsStringAsync().GetAwaiter().GetResult();
             }
 
-            //foreach (var header in context.Request.Headers)
-            //{
-            //    //requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
-            //    requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString());
-            //}
-
             // TODO : Check this for Form data: https://codingcanvas.com/different-ways-of-uploading-files-using-http-based-apis-part-1/
+
+            //if (context.Request.Path.ToString().Contains("sfdataprovider") 
+            //    || context.Request.Path.ToString().Contains("solutionmanager")
+            //    || (context.Request.Path.ToString().Contains("tron") && !context.Request.Path.ToString().Contains("tokens"))
+            //    || context.Request.Path.ToString().Contains("appbar")
+            //    || context.Request.Path.ToString().Contains("ems/api/v1"))
+            //{
+            //    return;
+            //}
 
             foreach (var header in context.Request.Headers)
             {
+                //if (header.Key == ":method" || header.Key == "Upgrade-Insecure-Requests")
+                //{
+                //    continue;
+                //}
+
                 if (requestMessage.Content != null)
                 {
                     if (header.Key.Equals("Content-Type", StringComparison.CurrentCultureIgnoreCase))
@@ -292,9 +230,6 @@ namespace HttpProxy.Middleware
                 context.Response.Headers[header.Key] = header.Value.ToArray();
             }
 
-            //context.Response.Headers["Connection"] = new string[] { "close" };
-            //context.Response.Headers["Cache-Control"] = new string[] { "no-cache", "no-store", "no-transform" };
-
             context.Response.Headers.Remove("transfer-encoding");
         }
         private static HttpMethod GetMethod(string method)
@@ -312,36 +247,6 @@ namespace HttpProxy.Middleware
         private Uri BuildTargetUri(HttpRequest request)
         {
             Uri targetUri = null;
-
-            //targetUri = ProxyPass(request, 
-            //    pathStartsWith: "/googleforms", 
-            //    replacePathSegmentWith: "http://localhost:5006/scenariobuilder/api/v1/networkdesigns/4c01857f-e044-4854-aae1-851ad3c252d1?include=sites,fibers");
-
-            //List<(string pathStartsWith, string replacePathSegmentWith)> proxyPassRules = new List<(string pathStartsWith, string replacePathSegmentWith)>()
-            //{
-            //    ("/planner-plus-ui/designs/", "http://127.0.0.1:8081/"),
-            //    ("/planner-plus-ui/design-wizard/", "http://127.0.0.1:8080/"),
-            //    ("/planner-plus-ui/design-settings/", "http://127.0.0.1:8082/"),
-            //    ("/login/", "https://dev.apps.ciena.com/login/"),
-            //    ("/sso/api/v1/identity-providers/", "https://dev.apps.ciena.com/sso/api/v1/identity-providers/"),
-            //    ("/sso/api/v1/identity-providers?next=%2F", "https://dev.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"),
-            //    ("/tron/", "https://dev.apps.ciena.com/tron/"),
-            //    ("/equipmenttopologyplanning", "http://localhost:5001/equipmenttopologyplanning"), // TODO : Need to add Header
-            //    ("/scenariobuilder", "http://localhost:5006/scenariobuilder"),
-            //    ("/sfdataprovider", "https://dev.apps.ciena.com/sfdataprovider"),
-            //    ("/solutionmanager", "https://dev.apps.ciena.com/solutionmanager"),
-            //    ("/nbis", "https://dev.apps.ciena.com/nbis"),
-            //    //("", ""),
-            //    //("", ""),
-            //    //("", ""),
-            //    //("", ""),
-            //    //("", ""),
-            //    //("", ""),
-            //    //("", ""),
-            //    //("", ""),
-            //    ("/", "https://dev.apps.ciena.com/"),
-            //    //("/", "http://127.0.0.1:8081/"),
-            //};
 
             foreach (var proxyRule in _proxyRules.ProxyPass)
             {
@@ -385,10 +290,11 @@ namespace HttpProxy.Middleware
 
             if (request.Path.StartsWithSegments(pathStartsWith, out var remainingPath))
             {
-                //if (replacePathSegmentWith.EndsWith('/') && remainingPath.StartsWithSegments("/", out _))
-                //{
-                //    replacePathSegmentWith = RemoveTralingSlash(replacePathSegmentWith);
-                //}
+                if (replacePathSegmentWith.EndsWith('/') && remainingPath.StartsWithSegments("/", out _))
+                {
+                    replacePathSegmentWith = RemoveTralingSlash(replacePathSegmentWith);
+                }
+
                 var queryString = request.QueryString.Value;
                 targetUri = new Uri(replacePathSegmentWith + remainingPath + queryString);
             }

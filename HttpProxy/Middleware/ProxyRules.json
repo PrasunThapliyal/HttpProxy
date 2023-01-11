@@ -3,65 +3,65 @@
     {
       "pathStartsWith": "/planner-plus-ui/designs/",
       "#replacePathSegmentWith": "http://127.0.0.1:8081/",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/planner-plus-ui/designs/"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/planner-plus-ui/designs/"
     },
     {
       "pathStartsWith": "/planner-plus-ui/design-wizard/",
       "#replacePathSegmentWith": "http://127.0.0.1:8080/",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/planner-plus-ui/design-wizard/",
-      "##replacePathSegmentWith": "https://localhost/StaticFiles/dist/"
+      "##replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/planner-plus-ui/design-wizard/",
+      "replacePathSegmentWith": "https://localhost/StaticFiles/dist_wizard/dist/"
     },
     {
       "pathStartsWith": "/nominatim/",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/nominatim/"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/nominatim/"
     },
     {
       "pathStartsWith": "/login/",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/login/"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/login/"
     },
     {
       "pathStartsWith": "/sso/api/v1/identity-providers/",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/sso/api/v1/identity-providers/"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/sso/api/v1/identity-providers/"
     },
     {
       "pathStartsWith": "/sso/api/v1/identity-providers?next=%2F",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/sso/api/v1/identity-providers?next=%2F"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"
     },
     {
       "pathStartsWith": "/tron/",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/tron/",
-      "#replacePathSegmentWith": "http://onxv1339.ott.ciena.com/tron/"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/tron/",
+      "#replacePathSegmentWith": "http://carbongrid2.test.apps.ciena.com/tron/"
     },
     {
       "pathStartsWith": "/equipmenttopologyplanning-internal",
       "replacePathSegmentWith": "http://localhost:5001/equipmenttopologyplanning-internal",
-      "#replacePathSegmentWith": "https://onxv1339.ott.ciena.com/equipmenttopologyplanning"
+      "#replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/equipmenttopologyplanning"
     },
     {
       "pathStartsWith": "/equipmenttopologyplanning",
       "replacePathSegmentWith": "http://localhost:5001/equipmenttopologyplanning",
-      "#replacePathSegmentWith": "https://onxv1339.ott.ciena.com/equipmenttopologyplanning"
+      "#replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/equipmenttopologyplanning"
     },
     {
       "pathStartsWith": "/scenariobuilder",
       "replacePathSegmentWith": "http://localhost:5006/scenariobuilder",
-      "#replacePathSegmentWith": "https://onxv1339.ott.ciena.com/scenariobuilder"
+      "#replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/scenariobuilder"
     },
     {
       "pathStartsWith": "/sfdataprovider",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/sfdataprovider"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/sfdataprovider"
     },
     {
       "pathStartsWith": "/solutionmanager",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/solutionmanager"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/solutionmanager"
     },
     {
       "pathStartsWith": "/nbis",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/nbis"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/nbis"
     },
     {
       "pathStartsWith": "/",
-      "replacePathSegmentWith": "https://onxv1339.ott.ciena.com/"
+      "replacePathSegmentWith": "https://carbongrid2.test.apps.ciena.com/"
     }
   ]
 
