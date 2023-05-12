@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HttpProxy.Hubs;
 using HttpProxy.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,6 +29,8 @@ namespace HttpProxy
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddSignalR();
 
             // See https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-5.0
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -67,6 +70,7 @@ namespace HttpProxy
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<NotificationHub>("WebSocketsService/chats");
             });
         }
     }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 
 namespace HttpProxy.Controllers
@@ -24,6 +26,30 @@ namespace HttpProxy.Controllers
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
+        }
+
+        [HttpGet("connect")]
+        public async Task<IActionResult> Connect()
+        {
+            var connection = new HubConnectionBuilder()
+                .WithUrl(
+                "http://localhost:44365/WebSocketsService/chats?networkDesignId=abc&clientId=def", 
+                options =>
+                {
+                    //var cookie = new Cookie
+                    //{
+                        
+                    //}
+                    //options.Cookies.Add("uac.authorization", "something")
+                    //options.Headers.Add()
+                }
+                )
+                .Build();
+
+            
+            await connection.StartAsync();
+
+            return Ok();
         }
 
         [HttpGet]

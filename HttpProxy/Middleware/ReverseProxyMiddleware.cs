@@ -61,6 +61,18 @@ namespace HttpProxy.Middleware
         {
             var counter = _counter++;
 
+            if (context.Request.Path.ToString().Contains("WebSocketsService"))
+            {
+                await _nextMiddleware(context);
+                return;
+            }
+
+            if (context.Request.Path.ToString().Contains("WeatherForecast"))
+            {
+                await _nextMiddleware(context);
+                return;
+            }
+
             var sw = System.Diagnostics.Stopwatch.StartNew();
             var targetUri = BuildTargetUri(context.Request);
 
@@ -128,18 +140,26 @@ namespace HttpProxy.Middleware
             return requestMessage;
         }
 
-        private async void CopyFromOriginalRequestContentAndHeaders(HttpContext context, HttpRequestMessage newRequestMessage)
+        private void CopyFromOriginalRequestContentAndHeaders(HttpContext context, HttpRequestMessage newRequestMessage)
         {
             // ref :https://stackoverflow.com/questions/25044166/how-to-clone-a-httprequestmessage-when-the-original-request-has-content
 
             var requestMethod = context.Request.Method;
 
-            if (context.Request.ContentLength != 0)
+            if (context.Request.ContentLength!= null && context.Request.ContentLength != 0)
             {
-                var memStream = new MemoryStream();
-                await context.Request.Body.CopyToAsync(memStream);
-                memStream.Position = 0;
-                newRequestMessage.Content = new StreamContent(memStream);
+                //var memStream = new MemoryStream();
+                //await context.Request.Body.CopyToAsync(memStream);
+                //memStream.Position = 0;
+                //newRequestMessage.Content = new StreamContent(memStream);
+
+
+                var streamContent = new StreamContent(context.Request.Body);
+                newRequestMessage.Content = streamContent;
+                streamContent.ReadAsStringAsync().GetAwaiter().GetResult();
+
+
+
                 context.Request.Headers?.ToList().ForEach(
                     header =>
                     {
