@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace HttpProxy.Hubs
@@ -24,6 +26,9 @@ namespace HttpProxy.Hubs
         {
             var networkId = this.Context.GetHttpContext().Request.Cookies["networkDesignId"];
             var clientId = this.Context.GetHttpContext().Request.Cookies["clientId"];
+            var authToken = this.Context.GetHttpContext().Request.Cookies["uac.authorization"];
+            var token = authToken.Replace("Bearer ", "");
+            token = authToken.Replace("bearer ", "");
             var connectionId = this.Context.ConnectionId;
             var client = this.Clients.Client(connectionId);
 
@@ -54,10 +59,26 @@ namespace HttpProxy.Hubs
 
             // At this point, we as proxy have received a new connection. So we must make a connection to the actual WebsocketService
 
-            var url = $"http://localhost:44365/WebSocketsService/chats?networkDesignId={networkId}&clientId={clientId}";
+            var newClientIdAsGuid = Guid.NewGuid();
+
+
+            //var url = $"http://localhost:44365/WebSocketsService/chats?networkDesignId={networkId}&clientId={clientId}";
+            var url = $"https://uat.apps.ciena.com/WebSocketsService/chats?networkDesignId={networkId}&clientId={newClientIdAsGuid}";
+
 
             var connection = new HubConnectionBuilder()
-                .WithUrl(url)
+                .WithUrl(url, (opts) =>
+                {
+                    opts.HttpMessageHandlerFactory = (message) =>
+                    {
+                        if (message is HttpClientHandler clientHandler)
+                            // always verify the SSL certificate
+                            clientHandler.ServerCertificateCustomValidationCallback +=
+                                (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                        return message;
+                    };
+                    opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "uat.apps.ciena.com" });
+                })
                 .Build();
 
             if (ConnectionsSouthBound.TryGetValue((networkId, clientId), out HubConnection hubConnection))

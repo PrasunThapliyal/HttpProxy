@@ -3,75 +3,75 @@
     {
       "pathStartsWith": "/planner-plus-ui/designs/",
       "#replacePathSegmentWith": "http://127.0.0.1:8081/",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/planner-plus-ui/designs/"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/planner-plus-ui/designs/"
     },
     {
       "pathStartsWith": "/planner-plus-ui/design-wizard/",
       "#replacePathSegmentWith": "http://127.0.0.1:8080/",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/planner-plus-ui/design-wizard/",
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/planner-plus-ui/design-wizard/",
       "###replacePathSegmentWith": "https://localhost/StaticFiles/dist_wizard/"
     },
     {
       "pathStartsWith": "/nominatim/",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/nominatim/"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/nominatim/"
     },
     {
       "pathStartsWith": "/login/",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/login/"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/login/"
     },
     {
       "pathStartsWith": "/sso/api/v1/identity-providers/",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/sso/api/v1/identity-providers/"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/sso/api/v1/identity-providers/"
     },
     {
       "pathStartsWith": "/sso/api/v1/identity-providers?next=%2F",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/sso/api/v1/identity-providers?next=%2F"
     },
     {
       "pathStartsWith": "/tron/",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/tron/",
-      "#replacePathSegmentWith": "http://cicd.apps.ciena.com/tron/"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/tron/",
+      "#replacePathSegmentWith": "http://uat.apps.ciena.com/tron/"
     },
     {
       "pathStartsWith": "/p2equipmenttopologyplanning-internal",
-      "replacePathSegmentWith": "http://localhost:5001/p2equipmenttopologyplanning-internal",
-      "#replacePathSegmentWith": "https://cicd.apps.ciena.com/p2equipmenttopologyplanning"
+      "#replacePathSegmentWith": "http://localhost:5001/p2equipmenttopologyplanning-internal",
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/p2equipmenttopologyplanning"
     },
     {
       "pathStartsWith": "/p2equipmenttopologyplanning",
-      "replacePathSegmentWith": "http://localhost:5001/p2equipmenttopologyplanning",
-      "#replacePathSegmentWith": "https://cicd.apps.ciena.com/p2equipmenttopologyplanning"
+      "#replacePathSegmentWith": "http://localhost:5001/p2equipmenttopologyplanning",
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/p2equipmenttopologyplanning"
     },
     {
       "pathStartsWith": "/scenariobuilder",
-      "replacePathSegmentWith": "http://localhost:5006/scenariobuilder",
-      "#replacePathSegmentWith": "https://cicd.apps.ciena.com/scenariobuilder"
+      "#replacePathSegmentWith": "http://localhost:5006/scenariobuilder",
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/scenariobuilder"
     },
     {
       "pathStartsWith": "/WebSocketsService/chats/negotiate",
-      "replacePathSegmentWith": "http://localhost:44365/WebSocketsService/chats/negotiate",
-      "#replacePathSegmentWith": "https://cicd.apps.ciena.com/WebSocketsService/chats/negotiate"
+      "#replacePathSegmentWith": "http://localhost:44365/WebSocketsService/chats/negotiate",
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/WebSocketsService/chats/negotiate"
     },
     {
       "pathStartsWith": "/WebSocketsService/chats",
-      "replacePathSegmentWith": "http://localhost:44365/WebSocketsService/chats",
-      "#replacePathSegmentWith": "https://cicd.apps.ciena.com/WebSocketsService/chats"
+      "#replacePathSegmentWith": "http://localhost:44365/WebSocketsService/chats",
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/WebSocketsService/chats"
     },
     {
       "pathStartsWith": "/sfdataprovider",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/sfdataprovider"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/sfdataprovider"
     },
     {
       "pathStartsWith": "/solutionmanager",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/solutionmanager"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/solutionmanager"
     },
     {
       "pathStartsWith": "/nbis",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/nbis"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/nbis"
     },
     {
       "pathStartsWith": "/",
-      "replacePathSegmentWith": "https://cicd.apps.ciena.com/"
+      "replacePathSegmentWith": "https://uat.apps.ciena.com/"
     }
   ]
 
