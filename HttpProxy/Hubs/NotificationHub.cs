@@ -62,8 +62,8 @@ namespace HttpProxy.Hubs
             var newClientIdAsGuid = Guid.NewGuid();
 
 
-            //var url = $"http://localhost:44365/WebSocketsService/chats?networkDesignId={networkId}&clientId={clientId}";
-            var url = $"https://uat.apps.ciena.com/WebSocketsService/chats?networkDesignId={networkId}&clientId={newClientIdAsGuid}";
+            var url = $"http://localhost:44365/WebSocketsService/chats?networkDesignId={networkId}&clientId={clientId}";
+            //var url = $"https://onxv1339.ott.ciena.com/WebSocketsService/chats?networkDesignId={networkId}&clientId={newClientIdAsGuid}";
 
 
             var connection = new HubConnectionBuilder()
@@ -77,7 +77,8 @@ namespace HttpProxy.Hubs
                                 (sender, certificate, chain, sslPolicyErrors) => { return true; };
                         return message;
                     };
-                    opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "uat.apps.ciena.com" });
+                    opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "localhost" });
+                    //opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "onxv1339.ott.ciena.com" });
                 })
                 .Build();
 
