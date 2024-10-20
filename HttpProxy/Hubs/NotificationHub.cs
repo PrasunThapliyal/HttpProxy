@@ -32,16 +32,16 @@ namespace HttpProxy.Hubs
             var connectionId = this.Context.ConnectionId;
             var client = this.Clients.Client(connectionId);
 
-            Logger.LogInformation($"OnConnectedAsync: networkDesignId, clientId from Cookies: {networkId}, {clientId}");
+            Logger.LogInformation($"***** OnConnectedAsync: networkDesignId, clientId from Cookies: {networkId}, {clientId}");
 
             if (string.IsNullOrEmpty(networkId) || string.IsNullOrEmpty(clientId))
             {
-                Logger.LogInformation("OnConnectedAsync: Could not fetch networkDesignId or clientId from cookies. Overwrite from Query Params.");
+                Logger.LogInformation("***** OnConnectedAsync: Could not fetch networkDesignId or clientId from cookies. Overwrite from Query Params.");
                 networkId = this.Context.GetHttpContext().Request.Query["networkDesignId"];
                 clientId = this.Context.GetHttpContext().Request.Query["clientId"];
             }
 
-            this.Logger.LogInformation($"OnConnectedAsync: networkId: {networkId}, clientId: {clientId}, ConnectionId: {Context.ConnectionId}");
+            this.Logger.LogInformation($"***** OnConnectedAsync: networkId: {networkId}, clientId: {clientId}, ConnectionId: {Context.ConnectionId}");
 
             //if (ConnectedUsers.TryGetValue(clientId, out var oldconnectionId))
             //{
@@ -62,8 +62,8 @@ namespace HttpProxy.Hubs
             var newClientIdAsGuid = Guid.NewGuid();
 
 
-            var url = $"http://localhost:44365/WebSocketsService/chats?networkDesignId={networkId}&clientId={clientId}";
-            //var url = $"https://onxv1339.ott.ciena.com/WebSocketsService/chats?networkDesignId={networkId}&clientId={newClientIdAsGuid}";
+            //var url = $"http://localhost:44365/WebSocketsService/chats?networkDesignId={networkId}&clientId={clientId}";
+            var url = $"https://10.186.0.47/WebSocketsService/chats?networkDesignId={networkId}&clientId={newClientIdAsGuid}"; // This works, and then we dont need to run WebSocket Service locally
 
 
             var connection = new HubConnectionBuilder()
@@ -77,8 +77,8 @@ namespace HttpProxy.Hubs
                                 (sender, certificate, chain, sslPolicyErrors) => { return true; };
                         return message;
                     };
-                    opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "localhost" });
-                    //opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "onxv1339.ott.ciena.com" });
+                    //opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "localhost" });
+                    opts.Cookies.Add(new System.Net.Cookie("uac.authorization", token) { Domain = "10.186.0.47" });
                 })
                 .Build();
 
@@ -93,7 +93,7 @@ namespace HttpProxy.Hubs
 
             connection.On<string, object>("ReceiveMessage", async (payloadType, eventArg2) => 
             {
-                Logger.LogInformation($"ReceiveMessage: {payloadType}, {networkId}, {clientId}, {eventArg2}");
+                Logger.LogInformation($"***** ReceiveMessage - Received from Southbound - forward to UI: {payloadType}, {networkId}, {clientId}, {eventArg2}");
 
                 //await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", payloadType, eventArg2);
                 await client.SendAsync("ReceiveMessage", payloadType, eventArg2);
@@ -110,7 +110,7 @@ namespace HttpProxy.Hubs
 
             var networkDesignId = this.Context.GetHttpContext().Request.Query["networkDesignId"];
 
-            this.Logger.LogInformation($"OnDisconnectedAsync: networkDesignId: {networkDesignId}, clientId: {clientId}, ConnectionId: {Context.ConnectionId}");
+            this.Logger.LogInformation($"***** OnDisconnectedAsync: networkDesignId: {networkDesignId}, clientId: {clientId}, ConnectionId: {Context.ConnectionId}");
 
             string oldconnectionId = string.Empty;
 
